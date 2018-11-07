@@ -181,6 +181,7 @@ class PathFinder:
         if self.arrived():
             return True
         else:    
+            # Set source target marker to new location
             self.map[self.currentRow][self.currentCol] = PathFinder.START
             return False
     
