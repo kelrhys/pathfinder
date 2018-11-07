@@ -252,20 +252,20 @@ if __name__ == '__main__':
     p = PathFinder(aMap)
     p.wavefront()
     print('Finished wavefront - calling buildwf...')
-    aMap = [[0, 0, 0, 0, 0],
-           [0, 1, 99, 1, 0],
-           [1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0],
-           [0, 0, 2, 0, 0]]
+    aMap = [[0, 0, 0, 0, 1],
+           [0, 1, 0, 0, 0],
+           [99, 1, 1, 1, 0],
+           [0, 0, 0, 1, 2],
+           [0, 1, 0, 0, 0]]
     p = PathFinder(aMap)
     p.buildwf()
     
     print('Finished buildwf - calling buildwf2...')
-    aMap = [[0, 0, 0, 0, 0],
-           [0, 1, 99, 1, 0],
-           [1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0],
-           [0, 0, 2, 0, 0]]
+    aMap = [[0, 0, 0, 0, 1],
+           [0, 1, 0, 0, 0],
+           [99, 1, 1, 1, 0],
+           [0, 0, 0, 1, 2],
+           [0, 1, 0, 0, 0]]
     p = PathFinder(aMap)
     p.buildwf2()
     
