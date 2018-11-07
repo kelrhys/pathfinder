@@ -4,6 +4,20 @@ Created on Nov 5, 2018
 @author: Rebecca
 '''
 
+from functools import wraps
+from time import time
+
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = time()
+        result = f(*args, **kw)
+        te = time()
+        print ('func:%r args:[%r, %r] took: %2.4f sec' % \
+          (f.__name__, args, kw, te-ts))
+        return result
+    return wrap
+
 class PathFinder:
     GOAL=2
     EMPTY=0
@@ -80,7 +94,8 @@ class PathFinder:
             for col in range(self.height): 
                 if self.map[row][col] == PathFinder.EMPTY:
                     return True
-                
+    
+    @timing            
     def wavefront(self):
         while self.emptyElementsExist():
             print('Wave {}'.format(self.currentWave))
@@ -90,6 +105,39 @@ class PathFinder:
             self.currentWave += 1
             self.printMap()
     
+    @timing
+    def buildwf(self):
+        progress=0
+        numloops=self.width*self.height
+        while progress<numloops:
+            self.currentRow=0
+            print('Wave: {}'.format(self.currentWave))
+            while self.currentRow<self.height:
+                self.currentCol=0
+                while self.currentCol<self.width:
+                    if self.map[self.currentRow][self.currentCol] == self.currentWave:
+                        # update north
+                        if self.currentRow > 0:
+                            if self.map[self.currentRow - 1][self.currentCol] == 0:
+                                self.map[self.currentRow - 1][self.currentCol] = self.currentWave + 1
+                        # update west
+                        if self.currentCol > 0:
+                            if self.map[self.currentRow][self.currentCol - 1] == 0:
+                                self.map[self.currentRow][self.currentCol - 1] = self.currentWave + 1
+                        # update east
+                        if self.currentCol < self.width-1:
+                            if self.map[self.currentRow][self.currentCol + 1] == 0:
+                                self.map[self.currentRow][self.currentCol + 1] = self.currentWave + 1
+                        # update south
+                        if self.currentRow < self.height-1:
+                            if self.map[self.currentRow + 1][self.currentCol] == 0:
+                                self.map[self.currentRow + 1][self.currentCol] = self.currentWave + 1
+                    self.currentCol += 1
+                self.currentRow += 1
+            progress += 1
+            self.currentWave += 1
+            self.printMap()
+                
     def arrived(self):
         if self.getLocation(PathFinder.GOAL) == [self.currentRow, self.currentCol]:
             return True
@@ -135,7 +183,8 @@ class PathFinder:
         else:    
             self.map[self.currentRow][self.currentCol] = PathFinder.START
             return False
-            
+    
+    @timing           
     def pathfinder(self):
         self.setLocation(self.getLocation(PathFinder.START))
         print('Start Location: {},{}'.format(self.currentRow, self.currentCol))
@@ -152,8 +201,18 @@ if __name__ == '__main__':
            [0, 0, 2, 0, 0]]
 
     p = PathFinder(aMap)
+    
     p.wavefront()
-    print()
+    print('Finished wavefront - calling buildwf...')
+    aMap = [[0, 0, 0, 0, 0],
+           [0, 1, 99, 1, 0],
+           [1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 2, 0, 0]]
+    p = PathFinder(aMap)
+    p.buildwf()
+    
+    
     p.pathfinder()
     
     aMap = [[0, 0, 0, 0, 1],
@@ -164,7 +223,14 @@ if __name__ == '__main__':
 
     p = PathFinder(aMap)
     p.wavefront()
-    print()
+    print('Finished wavefront - calling buildwf...')
+    aMap = [[0, 0, 0, 0, 0],
+           [0, 1, 99, 1, 0],
+           [1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 2, 0, 0]]
+    p = PathFinder(aMap)
+    p.buildwf()
     p.pathfinder()
     
     
