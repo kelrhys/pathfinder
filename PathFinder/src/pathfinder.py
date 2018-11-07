@@ -19,9 +19,9 @@ def timing(f):
     return wrap
 
 class PathFinder:
-    GOAL=2
+    DEST=2
     EMPTY=0
-    START=99
+    SOURCE=99
     PATH=98
     
     def __init__(self, aMap):
@@ -29,7 +29,7 @@ class PathFinder:
         self.height = 5
         self.currentRow = 0
         self.currentCol = 0
-        self.currentWave = PathFinder.GOAL
+        self.currentWave = PathFinder.DEST
         self.map = aMap
 
     def printMap(self):
@@ -71,7 +71,7 @@ class PathFinder:
                     return([row, col])
         return []
     
-    def setCurrentWave(self):
+    def setNextWave(self):
         # update north
         if self.currentRow > 0:
             if self.map[self.currentRow - 1][self.currentCol] == 0:
@@ -97,16 +97,20 @@ class PathFinder:
     
     @timing            
     def wavefront(self):
+        ''' intuitive implementation that follows pseudocode description. Also
+            fastest runtime. '''
         while self.emptyElementsExist():
             print('Wave {}'.format(self.currentWave))
             for currentWaveLocation in self.getCurrentWaveLocations():
                 self.setLocation(currentWaveLocation)
-                self.setCurrentWave()
+                self.setNextWave()
             self.currentWave += 1
             self.printMap()
     
     @timing
     def buildwf(self):
+        ''' PLTW solution in C/C++ style - not sure why they eschewed for loops 
+            and their own pseudocode...'''
         progress=0
         numloops=self.width*self.height
         while progress<numloops:
@@ -137,13 +141,29 @@ class PathFinder:
             progress += 1
             self.currentWave += 1
             self.printMap()
-                
+    
+    @timing
+    def buildwf2(self):
+        ''' PLTW version but with end condition checking and for loops - still
+            slower than my version with extra loops and method calls...'''
+        while self.emptyElementsExist():
+            print('Wave: {}'.format(self.currentWave))
+            
+            for row in range(self.height):
+                for col in range(self.width):
+                    if self.map[row][col] == self.currentWave:
+                        self.currentRow=row
+                        self.currentCol=col
+                        self.setNextWave()
+            self.currentWave += 1
+            self.printMap()
+                       
     def arrived(self):
-        if self.getLocation(PathFinder.GOAL) == [self.currentRow, self.currentCol]:
+        if self.getLocation(PathFinder.DEST) == [self.currentRow, self.currentCol]:
             return True
         return False
                 
-    def moveTowardsGoal(self):
+    def moveTowardsDestination(self):
         pathValues = [101, 101, 101, 101]
         
         # Show current location as part of the path
@@ -182,14 +202,14 @@ class PathFinder:
             return True
         else:    
             # Set source target marker to new location
-            self.map[self.currentRow][self.currentCol] = PathFinder.START
+            self.map[self.currentRow][self.currentCol] = PathFinder.SOURCE
             return False
     
     @timing           
     def pathfinder(self):
-        self.setLocation(self.getLocation(PathFinder.START))
+        self.setLocation(self.getLocation(PathFinder.SOURCE))
         print('Start Location: {},{}'.format(self.currentRow, self.currentCol))
-        while not self.moveTowardsGoal():
+        while not self.moveTowardsDestination():
             print('New Location: {},{}'.format(self.currentRow, self.currentCol))
             self.printMap()
         print('Path complete!')
@@ -212,7 +232,14 @@ if __name__ == '__main__':
            [0, 0, 2, 0, 0]]
     p = PathFinder(aMap)
     p.buildwf()
-    
+    print('Finished buildwf - calling buildwf2...')
+    aMap = [[0, 0, 0, 0, 0],
+           [0, 1, 99, 1, 0],
+           [1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 2, 0, 0]]
+    p = PathFinder(aMap)
+    p.buildwf2()
     
     p.pathfinder()
     
@@ -232,6 +259,17 @@ if __name__ == '__main__':
            [0, 0, 2, 0, 0]]
     p = PathFinder(aMap)
     p.buildwf()
+    
+    print('Finished buildwf - calling buildwf2...')
+    aMap = [[0, 0, 0, 0, 0],
+           [0, 1, 99, 1, 0],
+           [1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 2, 0, 0]]
+    p = PathFinder(aMap)
+    p.buildwf2()
+    
+    
     p.pathfinder()
     
     
